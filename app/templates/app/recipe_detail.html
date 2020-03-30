@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>LIBREcipes</title>
+</head>
+
+<body>
+    <h3>{{ recipe.name }}</h3>
+
+    <ul>
+        {% for ingredient in recipe.recipeingredient_set.all %}
+        <li>
+            {{ ingredient.amount }} {{ ingredient.unit }}
+            <b>{{ ingredient.ingredient.name }}</b>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <pre>{{ recipe.steps }}</pre>
+
+    <i>~{{ recipe.chef.username }}</i>
+
+</body>
+</html>

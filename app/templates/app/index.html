@@ -1,0 +1,14 @@
+
+<html>
+<head>
+    <title>LIBREcipes</title>
+</head>
+
+<body>
+    <ul>
+        {% for recipe in recipes %}
+        <li><a href="{% url 'recipe-detail' recipe.uuid %}">{{ recipe.name }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
