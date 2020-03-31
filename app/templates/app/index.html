@@ -1,14 +1,73 @@
-
+{% load static %}
+<!DOCTYPE html>
 <html>
-<head>
-    <title>LIBREcipes</title>
-</head>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>LIBREcipes</title>
+		<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+		<!-- Bulma Version 0.8.x-->
+		<link rel="stylesheet" href="https://unpkg.com/bulma@0.8.0/css/bulma.min.css" />
+	</head>
+	<body>
+        {% include 'app/navbar.html' %}
 
-<body>
-    <ul>
-        {% for recipe in recipes %}
-        <li><a href="{% url 'recipe-detail' recipe.uuid %}">{{ recipe.name }}</a></li>
-        {% endfor %}
-    </ul>
-</body>
+		<section class="container">
+			<div class="columns">
+				<div class="column is-3">
+					<a class="button is-primary is-block is-alt is-large" href="#">New Recipe</a>
+				</div>
+
+				<div class="column is-9">
+					<div class="box content">
+                        {% for recipe in recipes %}
+						<article class="media">
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+                                </figure>
+                            </div>
+
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <strong>{{ recipe.name }}</strong> <small><a href="#">&#64;{{ recipe.chef.username }}</a></small>
+                                        <br>
+                                        {{ recipe.ingredients.all|join:", " }}
+                                    </p>
+                                </div>
+                            </div>
+						</article>
+                        {% endfor %}
+					</div>
+				</div>
+			</div>
+		</section>
+		<footer class="footer">
+			<div class="container">
+				<div class="content has-text-centered">
+					<div class="columns is-mobile is-centered">
+						<div class="field is-grouped is-grouped-multiline">
+							<div class="control">
+								<div class="tags has-addons">
+									<a class="tag is-link" href="https://github.com/BulmaTemplates/bulma-templates">Bulma Templates</a>
+									<span class="tag is-light">Daniel Supernault</span>
+								</div>
+							</div>
+							<div class="control">
+								<div class="tags has-addons">
+									<a class="tag is-link">The source code is licensed</a>
+									<span class="tag is-light">MIT &nbsp;<i class="fa fa-github"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		<script async type="text/javascript" src="../js/bulma.js"></script>
+	</body>
 </html>
