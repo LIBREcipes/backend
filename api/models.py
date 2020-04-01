@@ -1,8 +1,11 @@
 from uuid import uuid4
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 from django.db import models
 
+
+class MyUser(AbstractUser):
+    uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
 
 class Brand(models.Model):
     uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
@@ -31,7 +34,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
     name = models.CharField(max_length=256)
-    chef = models.ForeignKey(User, on_delete=models.CASCADE)
+    chef = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     language = models.CharField(max_length=3, default='en')
     steps = models.CharField(max_length=1024)

@@ -1,6 +1,5 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeIngredient
+from .models import Ingredient, Recipe, RecipeIngredient, MyUser
 
 
 
@@ -11,8 +10,8 @@ class IngredientSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = User
-        fields = ('url', 'username', 'first_name', 'last_name', 'email',)
+        model = MyUser
+        fields = ('__all__')
 
 class RecipeIngredientSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

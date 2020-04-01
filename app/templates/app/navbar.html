@@ -1,10 +1,11 @@
+{% load static %}
 <nav class="navbar is-white topNav">
     <div class="container">
         <div class="navbar-brand">
-            <a class="navbar-item" href="../">
-                <img src="../images/bulma.png" width="112" height="28">
+            <a class="navbar-item" href="/">
+                <img src="{% static 'app/img/logo.svg.png' %}" width="112" height="28">
             </a>
-            <div class="navbar-burger burger" data-target="topNav">
+            <div class="navbar-burger burger" data-target="topNav" aria-label="menu" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -12,8 +13,8 @@
         </div>
         <div id="topNav" class="navbar-menu">
             <div class="navbar-start">
-                <a class="navbar-item" href="#">Home</a>
-                <a class="navbar-item" href="#">Recipes</a>
+                <a class="navbar-item" href="/">Home</a>
+                <a class="navbar-item" href="{% url 'recipes' %}">Recipes</a>
                 <a class="navbar-item" href="#">Ingredients</a>
             </div>
             <div class="navbar-end">

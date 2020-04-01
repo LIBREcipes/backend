@@ -1,9 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.models import User
 
 from .serializers import RecipeSerializer, IngredientSerializer, UserSerializer, RecipeIngredientSerializer
-from .models import Recipe, Ingredient, RecipeIngredient
+from .models import Recipe, Ingredient, RecipeIngredient, MyUser
 
 
 class RecipeViewset(viewsets.ModelViewSet):
@@ -19,7 +18,7 @@ class IngredientViewset(viewsets.ModelViewSet):
 
 
 class UserViewset(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Ingredient, Recipe, Brand, RecipeIngredient
+from django.contrib.auth.admin import UserAdmin
+from .models import Ingredient, Recipe, Brand, RecipeIngredient, MyUser
 from .forms import RecipeForm
 
 
@@ -17,3 +18,4 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Ingredient)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Brand)
+admin.site.register(MyUser, UserAdmin)
