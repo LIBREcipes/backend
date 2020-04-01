@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from api.models import Recipe, MyUser
 
 def index(request):
-    recipes = get_list_or_404(Recipe)
+    recipes = Recipe.objects.all()
     return render(
         request,
         'app/recipes/index.html',
