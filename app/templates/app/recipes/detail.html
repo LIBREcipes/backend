@@ -10,4 +10,27 @@
         </div>
     </div>
 </section>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Ingredients</h1>
+        <table>
+            {% for ingredient in recipe.recipeingredient_set.all %}
+            <tr>
+                <td><i>{{ ingredient.amount }} {{ ingredient.unit }}</i></td>
+                <td>{{ ingredient.ingredient.name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Steps</h1>
+        <pre>{{ recipe.steps }}</pre>
+    </div>
+</section>
+
+
 {% endblock %}
