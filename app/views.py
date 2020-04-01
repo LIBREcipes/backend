@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse
 
-from api.models import Recipe, MyUser
+from core.models import Recipe, MyUser
 
 def index(request):
     recipes = Recipe.objects.all()

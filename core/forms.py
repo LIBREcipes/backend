@@ -1,4 +1,4 @@
-from .models import Recipe
+from core.models import Recipe
 from django import forms
 
 class RecipeForm(forms.ModelForm):

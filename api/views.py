@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import RecipeSerializer, IngredientSerializer, UserSerializer, RecipeIngredientSerializer
-from .models import Recipe, Ingredient, RecipeIngredient, MyUser
+from core.models import Recipe, Ingredient, RecipeIngredient, MyUser
 
 
 class RecipeViewset(viewsets.ModelViewSet):
