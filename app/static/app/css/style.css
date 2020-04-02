@@ -2,3 +2,34 @@ table tr td {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+.nutrient-table {
+    margin: 10px auto;
+    max-width: 300px;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.nutrient-table tr {
+    border: 1px solid black;
+    background-color: white;
+}
+
+.nutrient-table tr.header {
+    border-bottom: 4px solid black;
+}
+
+.nutrient-table tr.header h1{
+    text-align: center;
+}
+
+.nutrient-table tr td.sub {
+    padding-left: 15px;
+}
+
+.nutrient-table tr td, .nutrient-table tr th {
+    padding: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+    background-color: white !important;
+}

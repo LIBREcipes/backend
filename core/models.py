@@ -26,11 +26,14 @@ class Ingredient(models.Model):
     brand = models.ForeignKey(Brand, blank=True, null=True, on_delete=models.CASCADE)
     language = models.CharField(max_length=3, default='en')
     barcode = models.IntegerField(null=True, blank=True)
+    default_unit = models.CharField(max_length=8, null=True, blank=True)
 
     calories = models.IntegerField(null=True, blank=True)
-    fat = models.IntegerField(null=True, blank=True)
-    carbs = models.IntegerField(null=True, blank=True)
-    proteine = models.IntegerField(null=True, blank=True)
+    fat = models.FloatField(null=True, blank=True)
+    fat_saturated = models.FloatField(null=True, blank=True)
+    carbs = models.FloatField(null=True, blank=True)
+    carbs_sugar = models.FloatField(null=True, blank=True)
+    proteine = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.name

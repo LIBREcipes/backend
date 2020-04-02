@@ -7,5 +7,7 @@ urlpatterns = [
     path('recipes/', views.index, name='recipes'),
     path('recipes/<uuid:recipe_uuid>/', views.recipeDetail, name='recipe-detail'),
 
-    path('chefs/<uuid:chef_uuid>/', views.chefDetail, name='chef-detail')
+    path('chefs/<uuid:chef_uuid>/', views.chefDetail, name='chef-detail'),
+
+    path('ingredients/<uuid:ingredient_uuid>/', views.ingredientDetail, name='ingredient-detail'),
 ]

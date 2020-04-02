@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse
 
-from core.models import Recipe, MyUser
+from core.models import Recipe, MyUser, Ingredient
 
 def index(request):
     recipes = Recipe.objects.all()
@@ -32,4 +32,14 @@ def chefDetail(request, chef_uuid):
         {
             'chef': chef,
         }
+    )
+
+def ingredientDetail(request, ingredient_uuid):
+    ingredient = get_object_or_404(Ingredient, uuid=ingredient_uuid)
+    return render(
+        request,
+        'app/ingredients/detail.html',
+        {
+            'ingredient': ingredient,
+        },
     )

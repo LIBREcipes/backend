@@ -1,0 +1,45 @@
+{% extends 'app/index.html' %}
+{% block body %}
+<section class="hero is-primary">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">{{ ingredient.name }}</h1>
+        </div>
+    </div>
+</section>
+
+<div class="content">
+    <table class="nutrient-table">
+        <tr class="header">
+            <th colspan="2"><h1>Nutrition Facts</h1></th>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Amount per 100 {{ ingredient.default_unit|default:"g" }}</strong></th>
+        </tr>
+        <tr class="header">
+            <th>Calories</th>
+            <td>{{ ingredient.calories }}</td>
+        </tr>
+        <tr>
+            <th>Fat</th>
+            <td>{{ ingredient.fat }} g</td>
+        </tr>
+        <tr class="sub">
+            <td class="sub">Saturated Fat</td>
+            <td>{{ ingredient.fat_saturated }} g</td>
+        </tr>
+        <tr>
+            <th>Carbs</th>
+            <td>{{ ingredient.carbs }} g</td>
+        </tr>
+        <tr>
+            <td class="sub">Sugars</td>
+            <td>{{ ingredient.carbs_sugar }} g</td>
+        </tr>
+        <tr>
+            <th>Proteine</th>
+            <td>{{ ingredient.proteine }} g</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

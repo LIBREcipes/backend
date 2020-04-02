@@ -18,10 +18,10 @@
             <article class="panel is-primary">
                 <p class="panel-heading">Ingredients</p>
                 {% for ingredient in recipe.recipeingredient_set.all %}
-                <p class="panel-block">
-                    <i>{{ ingredient.amount }} {{ ingredient.unit }}</i>
+                <a class="panel-block" href="{% url 'ingredient-detail' ingredient.ingredient.uuid %}">
+                    <strong>{{ ingredient.amount }} {{ ingredient.unit }}</strong>
                     <span class="is-pulled-right">&nbsp;{{ ingredient.ingredient.name }}</span>
-                </p>
+                </a>
                 {% endfor %}
             </article>
         </div>
