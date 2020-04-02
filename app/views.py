@@ -1,10 +1,16 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse
+from django.contrib.auth import views as auth_views
+from django.db.models import Q
 
 from core.models import Recipe, MyUser, Ingredient
+from .forms import LoginForm
 
 def index(request):
-    recipes = Recipe.objects.all()
+    return recipeIndex(request)
+
+def recipeIndex(request):
+    recipes = Recipe.objects.filter(Q(is_public=True) | Q(chef__username=request.user.username))
     return render(
         request,
         'app/recipes/index.html',
@@ -43,3 +49,6 @@ def ingredientDetail(request, ingredient_uuid):
             'ingredient': ingredient,
         },
     )
+
+def logout(request):
+    return auth_views.logout_then_login(request, login_url='/')

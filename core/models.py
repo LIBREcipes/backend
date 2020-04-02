@@ -49,14 +49,16 @@ class Recipe(models.Model):
     modified_date = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to=uuid_upload_to, null=True, blank=True)
 
+    is_public = models.BooleanField(default=False)
+
     def __str__(self):
         return self.name
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.IntegerField()
-    unit = models.CharField(max_length=8)
+    amount = models.FloatField()
+    unit = models.CharField(max_length=8, null=True, blank=True)
 
     class Meta:
         unique_together = (("recipe", "ingredient",),)

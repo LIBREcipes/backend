@@ -19,6 +19,35 @@
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <div class="dropdown-trigger">
+                                <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
+                                    <span class="icon is-small">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                    </span>
+                                    <span>{{ user.username }}</span>
+                                    <span class="icon is-small">
+                                        <i class="fa fa-angle-down" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            </div>
+                        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                            <div class="dropdown-content">
+                                {% comment %} <a href="#" class="dropdown-item">
+                                    Dropdown item
+                                </a>
+                                <hr class="dropdown-divider"> {% endcomment %}
+                                <a href="{% url 'logout' %}" class="dropdown-item">
+                                    <span class="icon">
+                                        <i class="fa fa-sign-out"></i>
+                                    </span>
+                                    <span> Logout </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="field is-grouped">
                         <p class="control">
                             <a class="button is-small">
@@ -31,7 +60,7 @@
                             </a>
                         </p>
                         <p class="control">
-                            <a class="button is-small is-info is-outlined">
+                            <a href="{% url 'login' %}" class="button is-small is-info is-outlined">
                                 <span class="icon">
                                     <i class="fa fa-user"></i>
                                 </span>
@@ -39,6 +68,7 @@
                             </a>
                         </p>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

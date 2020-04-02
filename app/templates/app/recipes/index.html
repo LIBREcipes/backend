@@ -28,6 +28,10 @@
 								{{ recipe.ingredients.all|join:", " }}
 							</p>
 						</div>
+
+						{% if recipe.is_public %}
+						<span class="has-text-info">public</span>
+						{% endif %}
 					</div>
 				</article>
 				{% endfor %}

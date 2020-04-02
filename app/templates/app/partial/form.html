@@ -1,0 +1,18 @@
+{% csrf_token %}
+{% for field in form %}
+    <div class="field">
+        <label class="label">{{ field.label_tag }}</label>
+        <div class="control">
+            {{ field }}
+        </div>
+        {% if field.help_text %}
+        <p class="help is-danger">{{ field.help_text }}</p>
+        {% endif %}
+    </div>
+{% endfor %}
+
+<div class="field">
+    <div class="control">
+        <button class="button is-link">{{ submit_text|default:'submit' }}</button>
+    </div>
+</div>

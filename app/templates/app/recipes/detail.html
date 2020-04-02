@@ -19,7 +19,7 @@
                 <p class="panel-heading">Ingredients</p>
                 {% for ingredient in recipe.recipeingredient_set.all %}
                 <a class="panel-block" href="{% url 'ingredient-detail' ingredient.ingredient.uuid %}">
-                    <strong>{{ ingredient.amount }} {{ ingredient.unit }}</strong>
+                    <strong>{{ ingredient.amount|floatformat }} {{ ingredient.unit|default:'' }}</strong>
                     <span class="is-pulled-right">&nbsp;{{ ingredient.ingredient.name }}</span>
                 </a>
                 {% endfor %}
