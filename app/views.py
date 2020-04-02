@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse
 from django.contrib.auth import views as auth_views
 from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 
 from core.models import Recipe, MyUser, Ingredient
 from .forms import LoginForm
@@ -21,6 +22,10 @@ def recipeIndex(request):
 
 def recipeDetail(request, recipe_uuid):
     recipe = get_object_or_404(Recipe, uuid=recipe_uuid)
+
+    if not recipe.is_public and recipe.chef.uuid != request.user.uuid:
+        raise PermissionDenied
+        
     return render(
         request,
         'app/recipes/detail.html',

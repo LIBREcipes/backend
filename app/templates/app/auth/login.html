@@ -24,7 +24,7 @@
                             <div class="box">
                                 <form action="{% url 'login' %}" method="post">
                                     {% include 'app/partial/form.html' with form=form url='login' submit_text='Login' %}
-                                    <input type="hidden" name="next" value="/" />
+                                    <input type="hidden" name="next" value="{{ next }}" />
                                 </form>
                             </div>
                         </div>
