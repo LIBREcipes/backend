@@ -37,6 +37,8 @@ class Recipe(models.Model):
     chef = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     language = models.CharField(max_length=3, default='en')
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
     steps = models.CharField(max_length=1024)
 
     def __str__(self):
