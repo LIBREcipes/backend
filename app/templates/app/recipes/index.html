@@ -12,7 +12,11 @@
 				<article class="media">
 					<div class="media-left">
 						<figure class="image is-64x64">
+							{% if recipe.image %}
+							<img src="{{ recipe.image.url }}" alt="Image" style="object-fit: cover;">
+							{% else %}
 							<img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+							{% endif %}
 						</figure>
 					</div>
 

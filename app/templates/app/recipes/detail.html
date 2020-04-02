@@ -12,26 +12,40 @@
     </div>
 </section>
 
-<section class="section">
-    <div class="container">
-        <h1 class="title">Ingredients</h1>
-        <table>
-            {% for ingredient in recipe.recipeingredient_set.all %}
-            <tr>
-                <td><i>{{ ingredient.amount }} {{ ingredient.unit }}</i></td>
-                <td>{{ ingredient.ingredient.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-</section>
+<div class="container" style="margin-top: 10px">
+    <div class="columns">
+        <div class="column is-3">
+            <article class="panel is-primary">
+                <p class="panel-heading">Ingredients</p>
+                {% for ingredient in recipe.recipeingredient_set.all %}
+                <p class="panel-block">
+                    <i>{{ ingredient.amount }} {{ ingredient.unit }}</i>
+                    <span class="is-pulled-right">&nbsp;{{ ingredient.ingredient.name }}</span>
+                </p>
+                {% endfor %}
+            </article>
+        </div>
 
-<section class="section">
-    <div class="container">
-        <h1 class="title">Steps</h1>
-        <pre>{{ recipe.steps }}</pre>
+        <div class="column is-9">
+            {% if recipe.image %}
+            <figure class="image is-2by1" style="margin-bottom: 10px">
+                <img src="{{ recipe.image.url }}" style="object-fit: cover;">
+            </figure>
+            {% endif %}
+            <article class="panel">
+                    <p class="panel-heading">Steps</h1>
+                    {% for step in recipe.recipestep_set.all %}
+                    <p class="panel-block">
+                        <strong>{{ step.step }}.</strong>&nbsp;
+                        {{ step.description }}
+                    </p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </div>
-</section>
+</div>
+
 
 
 {% endblock %}
