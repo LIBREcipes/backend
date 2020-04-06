@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep
 
 
@@ -31,3 +32,14 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('__all__')
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # del token['user_id']
+        # token['uuid'] = str(user.uuid)
+
+        return token
