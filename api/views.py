@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -74,3 +74,15 @@ class RecipeIngredientViewset(viewsets.ModelViewSet):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+
+class RecipesForChef(generics.ListAPIView):
+    model = Recipe
+    serializer_class = RecipeSerializer
+
+    def get_queryset(self):
+        chef_uuid = self.kwargs['chef_uuid']
+        if self.request.user.is_authenticated and self.request.user.uuid == chef_uuid:
+            return Recipe.objects.filter(chef__uuid=chef_uuid)
+        else:
+            return Recipe.objects.filter(chef__uuid=chef_uuid, is_public=True)
