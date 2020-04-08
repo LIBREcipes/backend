@@ -11,7 +11,7 @@ class RecipeStepInline(admin.TabularInline):
     model = RecipeStep
 
 class RecipeAdmin(admin.ModelAdmin):
-    # form = RecipeForm
+    form = RecipeForm
     inlines = [
         RecipeStepInline,
         RecipeIngredientInline,

@@ -42,12 +42,16 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
     name = models.CharField(max_length=256)
+    description = models.CharField(max_length=512, null=True, blank=True)
     chef = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     language = models.CharField(max_length=3, default='en')
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to=uuid_upload_to, null=True, blank=True)
+
+    portion_size = models.SmallIntegerField()
+    portion_type = models.CharField(max_length=32)
 
     is_public = models.BooleanField(default=False)
 
