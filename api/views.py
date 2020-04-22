@@ -1,6 +1,7 @@
+from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.http import Http404, HttpResponseForbidden
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -38,12 +39,46 @@ class RecipeViewset(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        chef = MyUser.objects.get(pk=request.user.id)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(chef=chef)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        # serializer.save(ingredients=ingredients)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
     
+
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     lookup_field = 'uuid'
-    # permission_classes = (IsAuthenticated,)
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+    def create(self, request, *args, **kwargs):
+        user = MyUser.objects.get(pk=request.user.id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class UserViewset(viewsets.ModelViewSet):

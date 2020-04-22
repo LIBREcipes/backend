@@ -35,6 +35,10 @@ class Ingredient(models.Model):
     carbs_sugar = models.FloatField(null=True, blank=True)
     proteine = models.FloatField(null=True, blank=True)
 
+    created_by = models.ForeignKey(MyUser, null=True, on_delete=models.SET_NULL)
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.name
 
@@ -44,7 +48,6 @@ class Recipe(models.Model):
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=512, null=True, blank=True)
     chef = models.ForeignKey(MyUser, on_delete=models.CASCADE)
-    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     language = models.CharField(max_length=3, default='en')
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
@@ -59,7 +62,7 @@ class Recipe(models.Model):
         return self.name
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.FloatField()
     unit = models.CharField(max_length=8, null=True, blank=True)
@@ -70,9 +73,13 @@ class RecipeIngredient(models.Model):
 
 class RecipeStep(models.Model):
     description = models.CharField(max_length=1024)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, related_name='steps', on_delete=models.CASCADE)
     step = models.SmallIntegerField()
     image = models.ImageField(upload_to=uuid_upload_to, null=True, blank=True)
 
     class Meta:
         unique_together = (("recipe", "step",),)
+
+    def __str__(self):
+        return "{} - {}".format(self.recipe.name, self.step)
+    

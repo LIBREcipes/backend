@@ -20,6 +20,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Ingredient)
+admin.site.register(RecipeStep)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Brand)
 admin.site.register(MyUser, UserAdmin)
