@@ -82,8 +82,12 @@ WSGI_APPLICATION = 'librecipes.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'someRandomStringPassword123',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -134,6 +138,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+USE_X_FORWARDED_HOST = True
 
 
 REST_FRAMEWORK = {
