@@ -5,10 +5,27 @@ from rest_framework import viewsets, generics, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import RecipeSerializer, IngredientSerializer, UserSerializer, RecipeIngredientSerializer, MyTokenObtainPairSerializer
-from core.models import Recipe, Ingredient, RecipeIngredient, MyUser
+from .serializers import RecipeSerializer, IngredientSerializer, UserSerializer, RecipeIngredientSerializer, MyTokenObtainPairSerializer, FileSerializer
+from core.models import Recipe, Ingredient, RecipeIngredient, MyUser, File
+
+class CreateFileView(generics.CreateAPIView):
+    serializer_class = FileSerializer
+    queryset = File.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        if not request.user:
+            raise HttpResponseForbidden
+
+        owner = MyUser.objects.get(pk=request.user.id)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(owner=owner)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=self.get_success_headers(serializer.data))
 
 
 class RecipeViewset(viewsets.ModelViewSet):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Ingredient, Recipe, Brand, RecipeIngredient, MyUser, RecipeStep
+from .models import Ingredient, Recipe, Brand, RecipeIngredient, MyUser, RecipeStep, File
 from .forms import RecipeForm
 
 
@@ -17,10 +17,17 @@ class RecipeAdmin(admin.ModelAdmin):
         RecipeIngredientInline,
     ]
 
+class MyUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {'fields': ('language',)}),
+    )
+    
+
 
 
 admin.site.register(Ingredient)
 admin.site.register(RecipeStep)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Brand)
-admin.site.register(MyUser, UserAdmin)
+admin.site.register(MyUser, MyUserAdmin)
+admin.site.register(File)

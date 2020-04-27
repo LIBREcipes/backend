@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep
-
+from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep, File
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -13,7 +12,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
-        fields = ('uuid', 'username', 'first_name', 'last_name', 'email')
+        fields = ('uuid', 'username', 'first_name', 'last_name', 'email', 'language')
+
+
+class FileSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+    owner = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    class Meta:
+        model = File
+        fields = '__all__'
+
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
@@ -35,6 +43,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, required=False)
     chef = UserSerializer(many=False, read_only=True)
     steps = StepSerializer(many=True, required=False)
+    image = FileSerializer(read_only=True)
+    image_id = serializers.PrimaryKeyRelatedField(
+            source='image', 
+            write_only=True,
+            queryset=File.objects.all(),
+            required=False
+        )
 
     def create(self, validated_data):
         step_data = validated_data.pop('steps', [])
@@ -57,6 +72,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         if 'ingredients' in validated_data:
             self.update_ingredients(instance, validated_data.pop('ingredients'))
 
+        if 'image' in validated_data:
+            self.update_image(instance, validated_data.pop('image'))
+
+        instance.name = validated_data.pop('name', instance.name)
+        instance.portion_size = validated_data.pop('portion_size', instance.portion_size)
+        instance.portion_type = validated_data.pop('portion_type', instance.portion_type)
+        instance.is_public = validated_data.pop('is_public', instance.is_public)
+
+        instance.save()
         return instance
     
     def update_steps(self, instance, steps_data):
@@ -95,8 +119,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             for ing in ingredient_dict.values():
                 ing.delete()
 
-
-            
+    def update_image(self, instance, image):
+        if image.owner.id is not self.context['request'].user.id:
+            raise serializers.ValidationError('Can not find this file.')
+        instance.image = image
 
     class Meta:
         model = Recipe
