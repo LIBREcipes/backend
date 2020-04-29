@@ -18,8 +18,9 @@ class RecipeAdmin(admin.ModelAdmin):
     ]
 
 class MyUserAdmin(UserAdmin):
+    list_display = UserAdmin.list_display + ('is_confirmed',)
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('language',)}),
+        ('Custom Fields', {'fields': ('language', 'is_confirmed')}),
     )
     
 

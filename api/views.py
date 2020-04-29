@@ -1,15 +1,25 @@
-from django.shortcuts import get_object_or_404
+from datetime import datetime, timedelta
+
+from django.core.mail import send_mail
 from django.db.models import Q
-from django.http import Http404, HttpResponseForbidden
-from rest_framework import viewsets, generics, status, filters
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.utils.timezone import make_aware
+from rest_framework import exceptions, filters, generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import RecipeSerializer, IngredientSerializer, UserSerializer, RecipeIngredientSerializer, MyTokenObtainPairSerializer, FileSerializer
-from core.models import Recipe, Ingredient, RecipeIngredient, MyUser, File
+from core.models import (File, Ingredient, MyUser, Recipe, RecipeIngredient,
+                         Token)
+
+from .serializers import (FileSerializer, IngredientSerializer,
+                          MyTokenObtainPairSerializer,
+                          RecipeIngredientSerializer, RecipeSerializer,
+                          UserSerializer)
+
 
 class CreateFileView(generics.CreateAPIView):
     serializer_class = FileSerializer
@@ -17,7 +27,7 @@ class CreateFileView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         if not request.user:
-            raise HttpResponseForbidden
+            raise exceptions.NotAuthenticated()
 
         owner = MyUser.objects.get(pk=request.user.id)
 
@@ -50,7 +60,7 @@ class RecipeViewset(viewsets.ModelViewSet):
             item = Recipe.objects.filter(uuid=uuid, is_public=True)
 
         if not item:
-            raise Http404
+            raise exceptions.NotFound()
 
         serializer = super().get_serializer(item[0])
 
@@ -105,7 +115,7 @@ class UserViewset(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
 
     def list(self, request: Request):
-        return HttpResponseForbidden()
+        raise exceptions.PermissionDenied()
 
     def retrieve(self, request: Request, uuid):
         if uuid == 'me' and request.user.is_authenticated:
@@ -117,6 +127,40 @@ class UserViewset(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        if 'username' in request.data:
+            request.data['username'] = request.data['username'].lower()
+        returnVal =  super().create(request, args, kwargs)
+
+        if not returnVal.data['uuid'] or not returnVal.data['email']:
+            raise exceptions.APIException(detail="No data to send email.")
+
+        token = Token.objects.create(
+            type=Token.TYPE_USER_CONFIRM,
+            reference=returnVal.data['uuid'],
+            valid_until=make_aware(datetime.now() + timedelta(hours=1))
+        )
+
+        html_body = get_template('api/emails/confirm_account.html').render(
+            {"request": request, "token": token}
+        )
+
+        send_mail(
+            "Welcome to Cooksel",
+            html_body,
+            'cooksel@madebit.be',
+            [returnVal.data['email']],
+            html_message=html_body
+        )
+        
+        return returnVal
+    
+    def destroy(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super.destroy(request, args, kwargs)
+        else:
+            return exceptions.PermissionDenied()
+
 
 class RecipeIngredientViewset(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()
@@ -126,7 +170,6 @@ class RecipeIngredientViewset(viewsets.ModelViewSet):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-
 
 class RecipesForChef(generics.ListAPIView):
     model = Recipe

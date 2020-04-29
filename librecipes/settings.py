@@ -114,6 +114,12 @@ AUTH_USER_MODEL = 'core.MyUser'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+EMAIL_HOST = os.getenv('LR_EMAIL_HOST', '127.0.0.1')
+EMAIL_PORT = os.getenv('LR_EMAIL_PORT', 10025)
+EMAIL_HOST_USER = os.getenv('LR_EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('LR_EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('LR_DEFAULT_FROM_EMAIL', 'cooksel@madebit.be')
+EMAIL_USE_TLS = os.getenv('LR_EMAIL_USE_TLS', 'false') == 'true'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

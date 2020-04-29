@@ -1,0 +1,6 @@
+{% load filters %}
+<h2>Welcome to Cooksel</h2>
+<p>
+    To confirm your account please 
+    <a href="{% abs_url 'confirm-account' token.reference token.token %}">click here</a>
+</p>

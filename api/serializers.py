@@ -1,6 +1,6 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep, File
+from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep, File, Token
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -10,9 +10,13 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('__all__')
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = MyUser
-        fields = ('uuid', 'username', 'first_name', 'last_name', 'email', 'language')
+        fields = ('uuid', 'username', 'first_name', 'last_name', 'email', 'language', 'password')
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -130,6 +134,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        returnVal = super().validate(attrs)
+
+        if not self.user.is_confirmed:
+            raise exceptions.AuthenticationFailed("You're account has not been verified yet.")
+
+        return returnVal
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)

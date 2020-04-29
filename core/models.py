@@ -1,6 +1,7 @@
 import os
+from hashids import Hashids
 from uuid import uuid4
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 
 from django.db import models
 
@@ -9,9 +10,16 @@ def uuid_upload_to(instance, filename):
     _, extension = os.path.splitext(filename)
     return '{0}.{1}'.format(uuid4(), extension)
 
+
+class MyUserManager(UserManager):
+    def get_by_natural_key(self, username):
+        return self.get(username__iexact=username)
+
 class MyUser(AbstractUser):
     uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
     language = models.CharField(max_length=3, default='en')
+    is_confirmed = models.BooleanField(default=False)
+    objects = MyUserManager()
 
 class Brand(models.Model):
     uuid = models.UUIDField(default=uuid4, unique=True, editable=False)
@@ -89,3 +97,14 @@ class RecipeStep(models.Model):
     def __str__(self):
         return "{} - {}".format(self.recipe.name, self.step)
     
+
+class Token(models.Model):
+    TYPE_USER_CONFIRM = 'user_confirm'
+
+    token = models.CharField(default=uuid4, max_length=36, unique=True)
+    reference = models.CharField(max_length=50)
+    type = models.CharField(max_length=50)
+    valid_until = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return '<{}> {} (valid until {})'.format(self.type, self.token, self.valid_until)

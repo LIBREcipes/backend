@@ -14,6 +14,7 @@ gunicorn = "*"
 django-heroku = "*"
 pillow = "*"
 django-cors-headers = "*"
+hashids = "*"
 
 [requires]
 python_version = "3.8"

@@ -1,59 +1,32 @@
-from django.shortcuts import render, get_object_or_404, get_list_or_404
-from django.http import HttpResponse
+from datetime import datetime
+
 from django.contrib.auth import views as auth_views
+from django.core.exceptions import (ObjectDoesNotExist, PermissionDenied,
+                                    ValidationError)
 from django.db.models import Q
-from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
+from django.shortcuts import get_list_or_404, get_object_or_404, render
+from django.template.loader import get_template
+from django.utils.timezone import make_aware
 
-from core.models import Recipe, MyUser, Ingredient
-from .forms import LoginForm
+from core.models import MyUser, Token
 
-def index(request):
-    return recipeIndex(request)
 
-def recipeIndex(request):
-    recipes = Recipe.objects.filter(Q(is_public=True) | Q(chef__username=request.user.username))
-    return render(
-        request,
-        'app/recipes/index.html',
-        {
-            'recipes': recipes,
-        }
+def confirmAccount(request, chef_uuid, token):
+    user = MyUser.objects.get(uuid=chef_uuid)
+    token = Token.objects.get(token=token)
+
+    if not token or not user or token.type != Token.TYPE_USER_CONFIRM:
+        raise ObjectDoesNotExist
+
+    if make_aware(datetime.now()) > token.valid_until:
+        token.delete()
+        raise ValidationError(message="Token has expired")
+
+    user.is_confirmed = True
+    user.save()
+    token.delete()
+
+    return HttpResponse(
+        get_template('app/confirm_successful.html').render({"username": user.username})
     )
-
-def recipeDetail(request, recipe_uuid):
-    recipe = get_object_or_404(Recipe, uuid=recipe_uuid)
-
-    if not recipe.is_public and recipe.chef.uuid != request.user.uuid:
-        raise PermissionDenied
-        
-    return render(
-        request,
-        'app/recipes/detail.html',
-        {
-            'recipe': recipe,
-        }
-    )
-
-
-def chefDetail(request, chef_uuid):
-    chef = get_object_or_404(MyUser, uuid=chef_uuid)
-    return render(
-        request,
-        'app/chefs/detail.html',
-        {
-            'chef': chef,
-        }
-    )
-
-def ingredientDetail(request, ingredient_uuid):
-    ingredient = get_object_or_404(Ingredient, uuid=ingredient_uuid)
-    return render(
-        request,
-        'app/ingredients/detail.html',
-        {
-            'ingredient': ingredient,
-        },
-    )
-
-def logout(request):
-    return auth_views.logout_then_login(request, login_url='/')
