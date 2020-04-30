@@ -83,6 +83,7 @@ class RecipeIngredient(models.Model):
 
     class Meta:
         unique_together = (("recipe", "ingredient",),)
+        ordering = ['ingredient__name']
 
 
 class RecipeStep(models.Model):
@@ -93,6 +94,7 @@ class RecipeStep(models.Model):
 
     class Meta:
         unique_together = (("recipe", "step",),)
+        ordering = ['step']
 
     def __str__(self):
         return "{} - {}".format(self.recipe.name, self.step)

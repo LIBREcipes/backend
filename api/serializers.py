@@ -89,9 +89,14 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     def update_steps(self, instance, steps_data):
         step_dict = dict((i.id, i) for i in instance.steps.all())
+        instance_steps = dict((i.step, i) for i in instance.steps.all())
 
         for step in steps_data:
             if 'id' in step:
+                stepCheckId = instance_steps.get(step['step']).id
+                if step['id'] is not stepCheckId:
+                    step_dict.pop(stepCheckId).delete()
+
                 step_item = step_dict.pop(step['id'])
                 serializer = StepSerializer(instance=step_item, data=step, partial=True)
                 if serializer.is_valid():
