@@ -8,7 +8,7 @@ from django.db import models
 
 def uuid_upload_to(instance, filename):
     _, extension = os.path.splitext(filename)
-    return '{0}.{1}'.format(uuid4(), extension)
+    return '{0}{1}'.format(uuid4(), extension)
 
 
 class MyUserManager(UserManager):
