@@ -80,6 +80,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             self.update_image(instance, validated_data.pop('image'))
 
         instance.name = validated_data.pop('name', instance.name)
+        instance.description = validated_data.pop('description', instance.description)
         instance.portion_size = validated_data.pop('portion_size', instance.portion_size)
         instance.portion_type = validated_data.pop('portion_type', instance.portion_type)
         instance.is_public = validated_data.pop('is_public', instance.is_public)
