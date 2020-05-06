@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-import django_heroku
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +26,7 @@ SECRET_KEY = '^68jw2hq_=v44xhz7=pw-%odaq+w=7)-xh8qobalp^ib%!l_x^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.getenv('LR_DJANGO_ALLOWED_HOST', '*')]
 
 
 # Application definition
@@ -158,5 +158,24 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Activate Django-Heroku.
-django_heroku.settings(locals())
+ACCESS_TOKEN_LIFETIME = timedelta(minutes=5),
+REFRESH_TOKEN_LIFETIME = timedelta(weeks=1),
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': './debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
