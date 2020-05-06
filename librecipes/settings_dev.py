@@ -12,3 +12,5 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
 }
+
+SECRET_KEY='^68jw2hq_=v44xhz7=pw-%odaq+w=7)-xh8qobalp^ib%!l_x^'
