@@ -79,7 +79,7 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ingredients', on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.FloatField()
-    unit = models.CharField(max_length=8, null=True, blank=True)
+    unit = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         unique_together = (("recipe", "ingredient",),)
