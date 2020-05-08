@@ -1,0 +1,39 @@
+<html>
+<body>
+    <style>
+        html{
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 60%;
+            margin: auto;
+            padding: 0;
+            text-align: center;
+        }
+        .banner {
+            background-color: hsl(171, 100%, 41%);
+            color: white;
+        }
+        .banner .title {
+            padding: 2rem;
+        }
+        .container {
+            background-color: #EEE;
+        }
+        .container section {
+            padding: 1rem;
+        }
+    </style>
+    <div class="container">
+        <header class="banner">
+            <h1 class="title">Cooksel</h1>
+        </header>
+        <section>
+            {% block body %}
+            {% endblock %}
+        </section>
+    </div>
+</body>
+</html>

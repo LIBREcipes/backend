@@ -102,6 +102,7 @@ class RecipeStep(models.Model):
 
 class Token(models.Model):
     TYPE_USER_CONFIRM = 'user_confirm'
+    TYPE_PASSWORD_RESET = 'password_reset'
 
     token = models.CharField(default=uuid4, max_length=36, unique=True)
     reference = models.CharField(max_length=50)

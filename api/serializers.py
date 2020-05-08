@@ -156,3 +156,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # token['uuid'] = str(user.uuid)
 
         return token
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)

@@ -18,7 +18,9 @@ from core.models import (File, Ingredient, MyUser, Recipe, RecipeIngredient,
 from .serializers import (FileSerializer, IngredientSerializer,
                           MyTokenObtainPairSerializer,
                           RecipeIngredientSerializer, RecipeSerializer,
-                          UserSerializer)
+                          UserSerializer, PasswordResetRequestSerializer)
+
+from core.services import EmailService, TokenService
 
 
 class CreateFileView(generics.CreateAPIView):
@@ -135,22 +137,13 @@ class UserViewset(viewsets.ModelViewSet):
         if not returnVal.data['uuid'] or not returnVal.data['email']:
             raise exceptions.APIException(detail="No data to send email.")
 
-        token = Token.objects.create(
-            type=Token.TYPE_USER_CONFIRM,
-            reference=returnVal.data['uuid'],
-            valid_until=make_aware(datetime.now() + timedelta(hours=1))
-        )
+        token = TokenService.create(returnVal.data['uuid'], Token.TYPE_USER_CONFIRM, timedelta(hours=1)).get_token()
 
-        html_body = get_template('api/emails/confirm_account.html').render(
-            {"request": request, "token": token}
-        )
-
-        send_mail(
-            "Welcome to Cooksel",
-            html_body,
-            'cooksel@madebit.be',
+        EmailService().send_mail(
+            'confirm_account.html',
+            'Welcome to Cooksel',
             [returnVal.data['email']],
-            html_message=html_body
+            { 'token': token, 'request': request,}
         )
         
         return returnVal
@@ -161,6 +154,28 @@ class UserViewset(viewsets.ModelViewSet):
         else:
             return exceptions.PermissionDenied()
 
+
+class PasswordResetRequest(generics.CreateAPIView):
+    serializer_class = PasswordResetRequestSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            user = MyUser.objects.get(email=serializer.data['email'])
+        except:
+            return Response('ok')
+
+        token = TokenService.create(user.uuid, Token.TYPE_PASSWORD_RESET, timedelta(hours=1)).get_token()
+
+        EmailService().send_mail(
+            'password_reset_request.html',
+            'Reset your password',
+            [user.email],
+            { 'token': token, 'request': request,}
+        )
+
+        return Response('ok')
 
 class RecipeIngredientViewset(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()
