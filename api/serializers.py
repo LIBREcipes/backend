@@ -1,6 +1,7 @@
 from rest_framework import serializers, exceptions
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from core.models import Ingredient, Recipe, RecipeIngredient, MyUser, RecipeStep, File, Token
+from django.db import transaction
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -90,25 +91,27 @@ class RecipeSerializer(serializers.ModelSerializer):
     
     def update_steps(self, instance, steps_data):
         step_dict = dict((i.id, i) for i in instance.steps.all())
-        instance_steps = dict((i.step, i) for i in instance.steps.all())
+
+        to_serialize = []
+        step_no_processed = []
 
         for step in steps_data:
-            if 'id' in step:
-                stepCheckId = instance_steps.get(step['step']).id
-                if step['id'] is not stepCheckId:
-                    step_dict.pop(stepCheckId).delete()
-
-                step_item = step_dict.pop(step['id'])
-                serializer = StepSerializer(instance=step_item, data=step, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-            
+            if 'id' in step and step['id'] in step_dict:
+                to_serialize.append(StepSerializer(step_dict.pop(step['id']), data=step))
             else:
-                RecipeStep.objects.create(recipe=instance, **step)
+                to_serialize.append(StepSerializer(data=step))
         
-        if len(step_dict) > 0:
+        with transaction.atomic():
             for step in step_dict.values():
                 step.delete()
+
+            for serializer in to_serialize:
+                if serializer.is_valid(raise_exception=True):
+                    if serializer.validated_data['step'] not in step_no_processed:
+                        serializer.save(recipe=instance)
+                        step_no_processed.append(serializer.validated_data['step'])
+                    else:
+                        raise serializers.ValidationError("There can not be more than one Step-'{}'".format(serializer.validated_data['step']))
 
         return instance
 

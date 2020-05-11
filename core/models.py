@@ -93,7 +93,6 @@ class RecipeStep(models.Model):
     image = models.ForeignKey(File, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
-        unique_together = (("recipe", "step",),)
         ordering = ['step']
 
     def __str__(self):
