@@ -67,7 +67,6 @@ cd cooksel
 docker-compose pull api
 docker-compose up -d
 docker-compose exec api ./manage.py migrate
-docker-compose exec api ./manage.py collectstatic
 EOF
 }
 

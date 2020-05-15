@@ -132,21 +132,29 @@ class UserViewset(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         if 'username' in request.data:
             request.data['username'] = request.data['username'].lower()
-        returnVal =  super().create(request, args, kwargs)
 
-        if not returnVal.data['uuid'] or not returnVal.data['email']:
+        serializer = super().get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save()
+        user.set_password(request.data['password'])
+        user.save()
+
+
+        if not user.uuid or not user.email:
             raise exceptions.APIException(detail="No data to send email.")
 
-        token = TokenService.create(returnVal.data['uuid'], Token.TYPE_USER_CONFIRM, timedelta(hours=1)).get_token()
+        token = TokenService.create(user.uuid, Token.TYPE_USER_CONFIRM, timedelta(hours=1)).get_token()
 
         EmailService().send_mail(
             'confirm_account.html',
             'Welcome to Cooksel',
-            [returnVal.data['email']],
+            [user.email],
             { 'token': token, 'request': request,}
         )
         
-        return returnVal
+        headers = super().get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def destroy(self, request, *args, **kwargs):
         if request.user.is_superuser:
