@@ -1,2 +1,5 @@
-<h1>Welcome, chef {{ username }}</h1>
-<h3>You have successfully confirmed your account</h3>
+{% extends 'app/base.html' %}
+{% block body %}
+  <h2>Welcome, chef <u>{{ username }}</u></h2>
+  <h3>You have successfully confirmed your account</h3>
+{% endblock %}

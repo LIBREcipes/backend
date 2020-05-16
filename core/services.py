@@ -42,9 +42,13 @@ class TokenService:
     def __init__(self, token: Token = None):
         self.token = token
 
-    def _check_has_token(self):
-        if self.token is None:
+    def _check_has_token(self, raise_exception=False):
+        has_token = self.token is not None
+
+        if not has_token and raise_exception:
             raise ObjectDoesNotExist('No token passed to TokenService')
+
+        return has_token
 
     def get_token(self):
         return self.token
@@ -68,8 +72,8 @@ class TokenService:
 
         return valid
 
-    def delete(self):
-        self._check_has_token()
+    def delete(self, raise_exception=False):
+        if self._check_has_token(raise_exception=raise_exception):
+            self.token.delete()
 
-        self.token.delete()
         self.token = None
