@@ -9,7 +9,7 @@ DEPLOY_HOST=''
 
 
 # Use GNU getopt to parse command line arguments
-if ! ARGUMENTS=$(getopt -o t:nd:p --long tag:,deploy:,no-build,push -- "$@"); then
+if ! ARGUMENTS=$(getopt -o t:nd:p --long tag:,deploy:,no-build,push,tag-latest: -- "$@"); then
   echo "Failed to parse command-line arguments"
   exit 1
 fi
@@ -34,6 +34,11 @@ while true; do
 
     -p|--push)
       PUSH=true
+      ;;
+
+    --tag-latest)
+      docker tag mattydebie/librecipes-backend:$2 mattydebie/librecipes-backend:latest
+      exit 0
       ;;
 
     --)
