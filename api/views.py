@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.utils.timezone import make_aware
 from rest_framework import exceptions, filters, generics, status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,10 +27,9 @@ class CreateFileView(generics.CreateAPIView):
     serializer_class = FileSerializer
     queryset = File.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        if not request.user:
-            raise exceptions.NotAuthenticated()
+    permission_classes = (IsAuthenticated,)
 
+    def post(self, request, *args, **kwargs):
         owner = MyUser.objects.get(pk=request.user.id)
 
         serializer = self.get_serializer(data=request.data)
@@ -41,32 +40,22 @@ class CreateFileView(generics.CreateAPIView):
 
 
 class RecipeViewset(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.none()
     serializer_class = RecipeSerializer
     lookup_field = 'uuid'
-    # permission_classes = (IsAuthenticated,)
 
-    def list(self, request: Request):
-        if request.user.is_authenticated:
-            items = Recipe.objects.filter(Q(is_public=True) | Q(chef__uuid=request.user.uuid))
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            queryset = Recipe.objects.filter(Q(is_public=True) | Q(chef__uuid=self.request.user.uuid))
         else:
-            items = Recipe.objects.filter(is_public=True)
-        serializer = super().get_serializer(items, many=True)
+            queryset = Recipe.objects.filter(is_public=True)
 
-        return Response(serializer.data)
-
-    def retrieve(self, request: Request, uuid):
-        if request.user.is_authenticated:
-            item = Recipe.objects.filter(Q(is_public=True) | Q(chef__uuid=request.user.uuid), uuid=uuid)
-        else:
-            item = Recipe.objects.filter(uuid=uuid, is_public=True)
-
-        if not item:
-            raise exceptions.NotFound()
-
-        serializer = super().get_serializer(item[0])
-
-        return Response(serializer.data)
+        return queryset
 
     def create(self, request, *args, **kwargs):
         chef = MyUser.objects.get(pk=request.user.id)
@@ -80,9 +69,10 @@ class RecipeViewset(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+        if not request.user.is_authenticated or instance.chef.id != request.user.id:
+            raise exceptions.NotFound
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        # serializer.save(ingredients=ingredients)
         self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
@@ -98,8 +88,10 @@ class IngredientViewset(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     lookup_field = 'uuid'
 
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def create(self, request, *args, **kwargs):
         user = MyUser.objects.get(pk=request.user.id)
@@ -114,7 +106,7 @@ class UserViewset(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'uuid'
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def list(self, request: Request):
         raise exceptions.PermissionDenied()
@@ -165,6 +157,7 @@ class UserViewset(viewsets.ModelViewSet):
 
 class PasswordResetRequest(generics.CreateAPIView):
     serializer_class = PasswordResetRequestSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -188,7 +181,8 @@ class PasswordResetRequest(generics.CreateAPIView):
 class RecipeIngredientViewset(viewsets.ModelViewSet):
     queryset = RecipeIngredient.objects.all()
     serializer_class = RecipeIngredientSerializer
-    # permission_classes = (IsAuthenticated,)
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -197,6 +191,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class RecipesForChef(generics.ListAPIView):
     model = Recipe
     serializer_class = RecipeSerializer
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
     def get_queryset(self):
         chef_uuid = self.kwargs['chef_uuid']
