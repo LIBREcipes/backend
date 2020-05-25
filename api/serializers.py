@@ -19,6 +19,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = MyUser
         fields = ('uuid', 'username', 'first_name', 'last_name', 'email', 'language', 'password')
 
+class UserBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyUser
+        fields = ('uuid', 'username', 'language')
 
 class FileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)

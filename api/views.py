@@ -18,7 +18,7 @@ from core.models import (File, Ingredient, MyUser, Recipe, RecipeIngredient,
 from .serializers import (FileSerializer, IngredientSerializer,
                           MyTokenObtainPairSerializer,
                           RecipeIngredientSerializer, RecipeSerializer,
-                          UserSerializer, PasswordResetRequestSerializer)
+                          UserSerializer, PasswordResetRequestSerializer, UserBaseSerializer)
 
 from core.services import EmailService, TokenService
 
@@ -106,18 +106,18 @@ class UserViewset(viewsets.ModelViewSet):
     queryset = MyUser.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'uuid'
-    permission_classes = (IsAuthenticated,)
 
     def list(self, request: Request):
-        raise exceptions.PermissionDenied()
+        if not request.user.is_superuser:
+            raise exceptions.PermissionDenied()
+
+        return super().list(request)
 
     def retrieve(self, request: Request, uuid):
         if uuid == 'me' and request.user.is_authenticated:
-            user = MyUser.objects.get(id=request.user.id)
+            serializer = super().get_serializer(MyUser.objects.get(id=request.user.id))
         else:
-            user = MyUser.objects.get(uuid=uuid)
-        
-        serializer = super().get_serializer(user)
+            serializer = UserBaseSerializer(MyUser.objects.get(uuid=uuid))
 
         return Response(serializer.data)
 
