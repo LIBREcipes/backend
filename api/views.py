@@ -40,7 +40,7 @@ class CreateFileView(generics.CreateAPIView):
 
 
 class RecipeViewset(viewsets.ModelViewSet):
-    queryset = Recipe.objects.none()
+    queryset = Recipe.objects.filter(is_public=True)
     serializer_class = RecipeSerializer
     lookup_field = 'uuid'
 
@@ -48,14 +48,6 @@ class RecipeViewset(viewsets.ModelViewSet):
     search_fields = ('name',)
 
     permission_classes = (IsAuthenticatedOrReadOnly,)
-
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            queryset = Recipe.objects.filter(Q(is_public=True) | Q(chef__uuid=self.request.user.uuid))
-        else:
-            queryset = Recipe.objects.filter(is_public=True)
-
-        return queryset
 
     def create(self, request, *args, **kwargs):
         chef = MyUser.objects.get(pk=request.user.id)
