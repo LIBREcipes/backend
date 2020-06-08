@@ -8,6 +8,8 @@ from django.utils.timezone import make_aware
 
 from core.models import Token
 
+import shortuuid
+
 
 class EmailService:
     def send_mail(self, template: str, subject: str,  recipients: [str], data: dict = None):
@@ -25,19 +27,56 @@ class EmailService:
 
 
 class TokenService:
+
+    @classmethod
+    def exists(cls, reference: str, type: str = None):
+        if type is not None:
+            return Token.objects.filter(type=type, reference=reference).exists()
+        
+        return Token.objects.filter(reference=reference).exists()
+
     @classmethod
     def get_from(cls, token_ref: str):
         return TokenService(Token.objects.get(token=token_ref))
 
     @classmethod
-    def create(cls, reference: str, type: str, delta: int):
+    def create(cls, reference: str, type: str, delta: int = None):
+        if delta is not None: 
+            until = make_aware(datetime.now()) + delta 
+        else: 
+            until = None
+
         return TokenService(
             Token.objects.create(
                 reference=reference,
                 type=type,
-                valid_until=make_aware(datetime.now()) + delta
+                valid_until=until
             )
         )
+
+    @classmethod
+    def create_short(cls, reference: str, type: str, delta: int = None):
+        while True:
+            token = shortuuid.ShortUUID().random(length=7)
+            try:
+                Token.objects.get(token=token)
+            except ObjectDoesNotExist:
+                break;
+        
+        if delta is not None: 
+            until = make_aware(datetime.now()) + delta 
+        else: 
+            until = None
+
+        return TokenService(
+            Token.objects.create(
+                token=token,
+                reference=reference,
+                type=type,
+                valid_until=until,
+            )
+        )
+
 
     def __init__(self, token: Token = None):
         self.token = token

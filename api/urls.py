@@ -26,6 +26,9 @@ urlpatterns = [
 
     path('users/<uuid:chef_uuid>/recipes', views.RecipesForChef.as_view(), name='recipes-for-chef'),
 
+    path('recipes/<uuid:recipe_uuid>/shortlink', views.getShortlinkForPublicRecipe, name='recipe-shortlink'),
+    path('recipes/shortlink/<token>', views.getRecipeFromShortlink, name='recipe-from-shortlink'),
+
     path('files', views.CreateFileView.as_view(), name='files')
     # path('token/verify', TokenVerifyView.as_view(), name='token_verify'),
 ]

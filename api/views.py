@@ -5,12 +5,14 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.utils.timezone import make_aware
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import exceptions, filters, generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import api_view
 
 from core.models import (File, Ingredient, MyUser, Recipe, RecipeIngredient,
                          Token)
@@ -60,9 +62,8 @@ class RecipeViewset(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
+        self.queryset = Recipe.objects.filter(chef__uuid=request.user.uuid)
         instance = self.get_object()
-        if not request.user.is_authenticated or instance.chef.id != request.user.id:
-            raise exceptions.NotFound
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -74,6 +75,18 @@ class RecipeViewset(viewsets.ModelViewSet):
 
         return Response(serializer.data)
     
+    def retrieve(self, request, *args, **kwargs):
+        self.queryset = Recipe.objects.all()
+        instance = self.get_object()
+
+        is_owner = request.user.is_authenticated and request.user.uuid == instance.chef.uuid
+        has_public_link = TokenService.exists(type=Token.TYPE_RECIPE_SHORTLINK, reference=instance.uuid)
+
+        if not is_owner and (not instance.is_public and not has_public_link): 
+            raise exceptions.NotFound
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class IngredientViewset(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
@@ -193,3 +206,37 @@ class RecipesForChef(generics.ListAPIView):
             return Recipe.objects.filter(chef__uuid=chef_uuid)
         else:
             return Recipe.objects.filter(chef__uuid=chef_uuid, is_public=True)
+
+@api_view()
+def getShortlinkForPublicRecipe(request, recipe_uuid):
+    recipe = Recipe.objects.get(uuid=recipe_uuid)
+
+    try:
+        token = Token.objects.get(type=Token.TYPE_RECIPE_SHORTLINK, reference=recipe_uuid)
+        return Response({'token': token.token})
+    except ObjectDoesNotExist:
+        pass
+
+    # if the recipe is private, only the creator can get the link
+    if not recipe.is_public and (not request.user.is_authenticated or recipe.chef.uuid != request.user.uuid):
+        raise exceptions.PermissionDenied('You are not allowed to share this recipe')
+
+    token = TokenService.create_short(recipe_uuid, Token.TYPE_RECIPE_SHORTLINK).get_token()
+    return Response({'token': token.token})
+
+@api_view(http_method_names=['GET', 'DELETE'])
+def getRecipeFromShortlink(request, token):
+    token = TokenService.get_from(token)
+    token.is_type(Token.TYPE_RECIPE_SHORTLINK, raise_exception=True)
+
+    if request.method == 'DELETE':
+        recipe = Recipe.objects.get(uuid=token.get_token().reference)
+        if not request.user.is_authenticated or recipe.chef.uuid != request.user.uuid:
+            raise exceptions.PermissionDenied
+        
+        token.delete()
+        return Response()
+    
+    return Response({
+        'recipe_uuid': token.get_token().reference
+    })

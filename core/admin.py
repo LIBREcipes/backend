@@ -11,6 +11,7 @@ class RecipeStepInline(admin.TabularInline):
     model = RecipeStep
 
 class RecipeAdmin(admin.ModelAdmin):
+    readonly_fields = ('uuid',)
     form = RecipeForm
     inlines = [
         RecipeStepInline,
